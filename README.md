@@ -220,4 +220,4 @@ Open browser and go to: http://localhost:3000/login.html
 
 ---
 
-> Built with ❤️ using C++, Node.js, and HTML/CSS/JS
+> Built with using C++, Node.js, and HTML/CSS/JS

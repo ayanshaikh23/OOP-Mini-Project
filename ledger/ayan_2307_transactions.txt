@@ -1,3 +1,0 @@
-debit,Pravin-upad,2500,bank transfer,pravin son gpay,12/4/2026
-credit,Muslim,100000,cash,Faisal paid at office,12/4/2026
-debit,Pravin-upad,5000,Cash,cash paid,13/4/2026

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Business Ledger – Dashboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; background: #0a0a0f; min-height: 100vh; padding: 1.5rem; color: #fff; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; }
+  .greeting p { font-size: 12px; color: rgba(255,255,255,0.35); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 2px; }
+  .greeting h2 { font-size: 18px; font-weight: 500; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; background: #6c63ff; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 500; cursor: pointer; flex-shrink: 0; }
+  .company-banner { text-align: center; margin-bottom: 1.75rem; padding: 1.25rem; background: #13131a; border: 0.5px solid rgba(255,255,255,0.08); border-radius: 16px; }
+  .company-banner p { font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+  .company-banner h1 { font-size: 22px; font-weight: 500; letter-spacing: -0.3px; }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
+  .card { background: #13131a; border: 0.5px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.25rem 1rem; }
+  .card.full { grid-column: span 2; }
+  .card-label { font-size: 11px; color: rgba(255,255,255,0.35); letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 10px; }
+  .card-value { font-size: 22px; font-weight: 500; letter-spacing: -0.5px; }
+  .card-value.purple { color: #a5a0ff; }
+  .card-value.green { color: #5dcaa5; }
+  .card-value.red { color: #f09595; }
+  .card-sub { font-size: 12px; color: rgba(255,255,255,0.25); margin-top: 4px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; vertical-align: middle; }
+  .dot.green { background: #5dcaa5; }
+  .dot.red { background: #f09595; }
+  .section-title { font-size: 12px; color: rgba(255,255,255,0.35); letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 12px; }
+  .entries { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem; }
+  .entry { background: #13131a; border: 0.5px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1rem; display: flex; align-items: center; justify-content: space-between; }
+  .entry-left { display: flex; align-items: center; gap: 12px; }
+  .entry-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 500; flex-shrink: 0; }
+  .entry-icon.c { background: rgba(93,202,165,0.12); color: #5dcaa5; }
+  .entry-icon.d { background: rgba(240,149,149,0.12); color: #f09595; }
+  .entry-name { font-size: 14px; font-weight: 500; }
+  .entry-date { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+  .entry-method { font-size: 11px; color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 20px; margin-top: 4px; display: inline-block; }
+  .entry-amount span { font-size: 15px; font-weight: 500; }
+  .entry-amount span.c { color: #5dcaa5; }
+  .entry-amount span.d { color: #f09595; }
+  .fab { position: fixed; bottom: 90px; right: 24px; width: 56px; height: 56px; background: #6c63ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; box-shadow: 0 4px 20px rgba(108,99,255,0.4); }
+  .fab svg { width: 24px; height: 24px; fill: #fff; }
+  .nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; padding: 12px 0 20px; background: #13131a; border-top: 0.5px solid rgba(255,255,255,0.07); }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; text-decoration: none; }
+  .nav-icon { width: 22px; height: 22px; }
+  .nav-label { font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.4px; }
+  .nav-item.active .nav-label { color: #6c63ff; }
+  .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: #6c63ff; }
+  .empty { text-align: center; padding: 2rem; color: rgba(255,255,255,0.3); font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="greeting">
+    <p id="timeGreet">Good afternoon</p>
+    <h2 id="welcomeUser">Welcome</h2>
+  </div>
+  <div class="avatar" id="avatarEl" onclick="window.location.href='profile.html'">?</div>
+</div>
+
+<div class="company-banner">
+  <p>Company</p>
+  <h1 id="companyName">Loading...</h1>
+</div>
+
+<div class="cards">
+  <div class="card full">
+    <div class="card-label">Total Balance</div>
+    <div class="card-value purple" id="totalBalance">₹ 0.00</div>
+    <div class="card-sub">Updated just now</div>
+  </div>
+  <div class="card">
+    <div class="card-label"><span class="dot green"></span>Credited</div>
+    <div class="card-value green" id="totalCredited">₹ 0</div>
+    <div class="card-sub" id="creditCount">0 entries</div>
+  </div>
+  <div class="card">
+    <div class="card-label"><span class="dot red"></span>Debited</div>
+    <div class="card-value red" id="totalDebited">₹ 0</div>
+    <div class="card-sub" id="debitCount">0 entries</div>
+  </div>
+</div>
+
+<div class="section-title">Recent Transactions</div>
+<div class="entries" id="entriesList">
+  <div class="empty">No transactions yet</div>
+</div>
+
+<button class="fab" onclick="window.location.href='transaction.html'" title="Add Transaction">
+  <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+</button>
+
+<nav class="nav">
+  <a class="nav-item active" href="dashboard.html">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="#6c63ff"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+    <span class="nav-label" style="color:#6c63ff;">Dashboard</span>
+    <div class="nav-dot"></div>
+  </a>
+  <a class="nav-item" href="transaction.html">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+    <span class="nav-label">Transactions</span>
+  </a>
+  <a class="nav-item" href="profile.html">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+    <span class="nav-label">Profile</span>
+  </a>
+</nav>
+
+<script>
+const username = localStorage.getItem('username') || 'User';
+const h = new Date().getHours();
+document.getElementById('timeGreet').textContent = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+document.getElementById('welcomeUser').textContent = 'Welcome, ' + username;
+document.getElementById('avatarEl').textContent = username.slice(0,2).toUpperCase();
+
+async function loadDashboard() {
+  try {
+    const res = await fetch('http://localhost:3000/dashboard?username=' + username);
+    const data = await res.json();
+    document.getElementById('totalBalance').textContent = '₹ ' + Number(data.balance).toLocaleString('en-IN', {minimumFractionDigits:2});
+    document.getElementById('totalCredited').textContent = '₹ ' + Number(data.credited).toLocaleString('en-IN');
+    document.getElementById('totalDebited').textContent = '₹ ' + Number(data.debited).toLocaleString('en-IN');
+    document.getElementById('creditCount').textContent = data.creditCount + ' entries';
+    document.getElementById('debitCount').textContent = data.debitCount + ' entries';
+
+    const profileRes = await fetch('http://localhost:3000/profile?username=' + username);
+    const profile = await profileRes.json();
+    document.getElementById('companyName').textContent = profile.companyName || username + "'s Business";
+
+    const txRes = await fetch('http://localhost:3000/transactions?username=' + username + '&limit=5');
+    const txData = await txRes.json();
+    const list = document.getElementById('entriesList');
+    if (txData.transactions && txData.transactions.length > 0) {
+      list.innerHTML = txData.transactions.map(tx => `
+        <div class="entry">
+          <div class="entry-left">
+            <div class="entry-icon ${tx.type === 'credit' ? 'c' : 'd'}">${tx.type === 'credit' ? '+' : '−'}</div>
+            <div>
+              <div class="entry-name">${tx.item}</div>
+              <div class="entry-date">${tx.date}</div>
+              <span class="entry-method">${tx.method}</span>
+            </div>
+          </div>
+          <div class="entry-amount">
+            <span class="${tx.type === 'credit' ? 'c' : 'd'}">${tx.type === 'credit' ? '+' : '−'} ₹ ${Number(tx.amount).toLocaleString('en-IN')}</span>
+          </div>
+        </div>`).join('');
+    }
+  } catch {
+    document.getElementById('companyName').textContent = username + "'s Business";
+  }
+}
+loadDashboard();
+</script>
+</body>
+</html>

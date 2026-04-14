@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Business Ledger – Login</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; background: #0a0a0f; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+  .card { width: 100%; max-width: 400px; background: #13131a; border: 0.5px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 2.5rem 2rem; }
+  .brand { text-align: center; margin-bottom: 2rem; }
+  .brand-icon { width: 52px; height: 52px; background: linear-gradient(135deg, #6c63ff, #4f46e5); border-radius: 14px; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+  .brand-icon svg { width: 26px; height: 26px; fill: white; }
+  .brand h1 { color: #fff; font-size: 20px; font-weight: 500; letter-spacing: -0.3px; }
+  .brand p { color: rgba(255,255,255,0.4); font-size: 13px; margin-top: 4px; }
+  .toggle-wrap { background: #0a0a0f; border-radius: 12px; padding: 4px; display: flex; margin-bottom: 2rem; position: relative; }
+  .toggle-pill { position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: #6c63ff; border-radius: 9px; transition: left 0.3s cubic-bezier(0.4,0,0.2,1); }
+  .toggle-btn { flex: 1; padding: 10px; font-size: 13px; font-weight: 500; background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.4); position: relative; z-index: 1; transition: color 0.3s; border-radius: 9px; font-family: inherit; }
+  .toggle-btn.active { color: #fff; }
+  .field { margin-bottom: 1.25rem; }
+  .field label { display: block; font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.35); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 8px; }
+  .field input { width: 100%; background: #0a0a0f; border: 0.5px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 13px 16px; font-size: 15px; color: #fff; outline: none; font-family: inherit; transition: border-color 0.2s; }
+  .field input:focus { border-color: rgba(108,99,255,0.6); }
+  .field input::placeholder { color: rgba(255,255,255,0.2); }
+  .pw-wrap { position: relative; }
+  .pw-wrap input { padding-right: 60px; }
+  .pw-toggle { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; color: rgba(255,255,255,0.3); font-size: 12px; cursor: pointer; font-family: inherit; letter-spacing: 0.3px; }
+  .pw-toggle:hover { color: rgba(255,255,255,0.6); }
+  .submit-btn { width: 100%; padding: 14px; background: #6c63ff; border: none; border-radius: 12px; color: #fff; font-size: 15px; font-weight: 500; cursor: pointer; font-family: inherit; margin-top: 0.5rem; transition: opacity 0.2s, transform 0.1s; }
+  .submit-btn:hover { opacity: 0.9; }
+  .submit-btn:active { transform: scale(0.98); }
+  .msg { padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-top: 1rem; display: none; }
+  .msg.success { background: rgba(29,158,117,0.15); border: 0.5px solid rgba(29,158,117,0.3); color: #5dcaa5; }
+  .msg.error { background: rgba(226,75,74,0.12); border: 0.5px solid rgba(226,75,74,0.3); color: #f09595; }
+  .login-form, .signup-form { display: none; }
+  .login-form.active, .signup-form.active { display: block; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.4-1.4L12 14.2l7.6-7.6L21 8l-9 9z"/></svg>
+    </div>
+    <h1>Business Ledger</h1>
+    <p>Manage your accounts</p>
+  </div>
+  <div class="toggle-wrap">
+    <div class="toggle-pill" id="pill"></div>
+    <button class="toggle-btn active" id="loginBtn" onclick="switchTab('login')">Login</button>
+    <button class="toggle-btn" id="signupBtn" onclick="switchTab('signup')">Create Account</button>
+  </div>
+  <div class="login-form active" id="loginForm">
+    <div class="field"><label>Username</label><input type="text" id="loginUser" placeholder="Enter your username" /></div>
+    <div class="field"><label>Password</label>
+      <div class="pw-wrap"><input type="password" id="loginPass" placeholder="Enter your password" /><button class="pw-toggle" onclick="togglePw('loginPass',this)">Show</button></div>
+    </div>
+    <button class="submit-btn" onclick="handleLogin()">Login</button>
+  </div>
+  <div class="signup-form" id="signupForm">
+    <div class="field"><label>Username</label><input type="text" id="signUser" placeholder="Choose a username" /></div>
+    <div class="field"><label>Password</label>
+      <div class="pw-wrap"><input type="password" id="signPass" placeholder="Create a password" /><button class="pw-toggle" onclick="togglePw('signPass',this)">Show</button></div>
+    </div>
+    <div class="field"><label>Confirm Password</label>
+      <div class="pw-wrap"><input type="password" id="signConfirm" placeholder="Repeat your password" /><button class="pw-toggle" onclick="togglePw('signConfirm',this)">Show</button></div>
+    </div>
+    <button class="submit-btn" onclick="handleSignup()">Create Account</button>
+  </div>
+  <div class="msg" id="msgBox"></div>
+</div>
+<script>
+function switchTab(tab) {
+  const pill = document.getElementById('pill');
+  document.getElementById('msgBox').style.display = 'none';
+  if (tab === 'login') {
+    pill.style.left = '4px';
+    document.getElementById('loginBtn').classList.add('active');
+    document.getElementById('signupBtn').classList.remove('active');
+    document.getElementById('loginForm').classList.add('active');
+    document.getElementById('signupForm').classList.remove('active');
+  } else {
+    pill.style.left = 'calc(50%)';
+    document.getElementById('signupBtn').classList.add('active');
+    document.getElementById('loginBtn').classList.remove('active');
+    document.getElementById('signupForm').classList.add('active');
+    document.getElementById('loginForm').classList.remove('active');
+  }
+}
+function togglePw(id, btn) {
+  const input = document.getElementById(id);
+  if (input.type === 'password') { input.type = 'text'; btn.textContent = 'Hide'; }
+  else { input.type = 'password'; btn.textContent = 'Show'; }
+}
+function showMsg(text, type) {
+  const box = document.getElementById('msgBox');
+  box.textContent = text; box.className = 'msg ' + type; box.style.display = 'block';
+}
+async function handleLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value.trim();
+  if (!u || !p) { showMsg('Please fill in all fields.', 'error'); return; }
+  try {
+    const res = await fetch('http://localhost:3000/login', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({username:u, password:p}) });
+    const data = await res.json();
+    if (data.success) { localStorage.setItem('username', u); window.location.href = 'dashboard.html'; }
+    else showMsg(data.message || 'Invalid credentials.', 'error');
+  } catch { showMsg('Cannot connect to server. Make sure Node.js is running.', 'error'); }
+}
+async function handleSignup() {
+  const u = document.getElementById('signUser').value.trim();
+  const p = document.getElementById('signPass').value.trim();
+  const c = document.getElementById('signConfirm').value.trim();
+  if (!u || !p || !c) { showMsg('Please fill in all fields.', 'error'); return; }
+  if (p !== c) { showMsg('Passwords do not match.', 'error'); return; }
+  try {
+    const res = await fetch('http://localhost:3000/register', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({username:u, password:p}) });
+    const data = await res.json();
+    if (data.success) { showMsg('Account created! You can now login.', 'success'); switchTab('login'); }
+    else showMsg(data.message || 'Registration failed.', 'error');
+  } catch { showMsg('Cannot connect to server. Make sure Node.js is running.', 'error'); }
+}
+</script>
+</body>
+</html>

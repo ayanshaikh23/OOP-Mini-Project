@@ -1,0 +1,3 @@
+credit,Muslim,100000,Cash,Faisal Office par akar degya,12/4/2026
+credit,Pravin-Upad,2000,Bank Transfer,Ajay ne Gpay kayra,12/4/2026
+debit,Bricks,40000,Cash,cash aypa ,12/4/2026

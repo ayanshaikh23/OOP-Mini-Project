@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Business Ledger – New Transaction</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; background: #0a0a0f; min-height: 100vh; padding: 1.5rem 1.5rem 6rem; color: #fff; }
+  .topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 1.75rem; }
+  .back-btn { width: 36px; height: 36px; border-radius: 10px; background: #13131a; border: 0.5px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+  .back-btn svg { width: 18px; height: 18px; fill: rgba(255,255,255,0.6); }
+  .topbar h2 { font-size: 18px; font-weight: 500; }
+  .type-toggle { display: flex; background: #13131a; border: 0.5px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 4px; margin-bottom: 1.5rem; position: relative; }
+  .type-pill { position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); border-radius: 10px; transition: left 0.3s cubic-bezier(0.4,0,0.2,1); }
+  .type-pill.credit { background: rgba(93,202,165,0.15); border: 0.5px solid rgba(93,202,165,0.25); left: 4px; }
+  .type-pill.debit { background: rgba(240,149,149,0.12); border: 0.5px solid rgba(240,149,149,0.25); left: calc(50%); }
+  .type-btn { flex: 1; padding: 10px; font-size: 13px; font-weight: 500; background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.3); position: relative; z-index: 1; transition: color 0.3s; font-family: inherit; border-radius: 10px; }
+  .type-btn.active.credit { color: #5dcaa5; }
+  .type-btn.active.debit { color: #f09595; }
+  .field { margin-bottom: 1.25rem; }
+  .field label { display: block; font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.35); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 8px; }
+  .field input, .field select, .field textarea { width: 100%; background: #13131a; border: 0.5px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 13px 16px; font-size: 15px; color: #fff; outline: none; font-family: inherit; transition: border-color 0.2s; -webkit-appearance: none; appearance: none; }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: rgba(108,99,255,0.5); }
+  .field input::placeholder, .field textarea::placeholder { color: rgba(255,255,255,0.2); }
+  .field textarea { resize: none; height: 88px; }
+  .field select option { background: #13131a; color: #fff; }
+  .select-wrap { position: relative; }
+  .select-wrap::after { content: ''; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid rgba(255,255,255,0.3); pointer-events: none; }
+  .date-display { background: #13131a; border: 0.5px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 13px 16px; font-size: 15px; display: flex; align-items: center; justify-content: space-between; }
+  .date-badge { font-size: 10px; background: rgba(108,99,255,0.15); color: #a5a0ff; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; }
+  .pay-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pay-opt { background: #13131a; border: 0.5px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+  .pay-opt.selected { border-color: rgba(108,99,255,0.5); background: rgba(108,99,255,0.08); }
+  .pay-opt p { font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.5); margin-top: 6px; transition: color 0.2s; }
+  .pay-opt.selected p { color: #a5a0ff; }
+  .pay-opt svg { width: 22px; height: 22px; fill: rgba(255,255,255,0.25); transition: fill 0.2s; }
+  .pay-opt.selected svg { fill: #a5a0ff; }
+  .add-item-row { display: flex; gap: 10px; margin-top: 8px; }
+  .add-item-row input { flex: 1; background: #13131a; border: 0.5px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px 14px; font-size: 14px; color: #fff; outline: none; font-family: inherit; }
+  .add-item-row input::placeholder { color: rgba(255,255,255,0.2); }
+  .add-item-btn { padding: 10px 16px; background: rgba(108,99,255,0.15); border: 0.5px solid rgba(108,99,255,0.3); border-radius: 10px; color: #a5a0ff; font-size: 13px; cursor: pointer; font-family: inherit; white-space: nowrap; }
+  .submit-btn { width: 100%; padding: 15px; border: none; border-radius: 14px; color: #fff; font-size: 15px; font-weight: 500; cursor: pointer; font-family: inherit; margin-top: 1.75rem; transition: opacity 0.2s, transform 0.1s; }
+  .submit-btn.credit-mode { background: #1d9e75; }
+  .submit-btn.debit-mode { background: #a32d2d; }
+  .submit-btn:hover { opacity: 0.9; }
+  .submit-btn:active { transform: scale(0.98); }
+  .msg { padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-top: 1rem; display: none; }
+  .msg.success { background: rgba(29,158,117,0.15); border: 0.5px solid rgba(29,158,117,0.3); color: #5dcaa5; }
+  .msg.error { background: rgba(226,75,74,0.12); border: 0.5px solid rgba(226,75,74,0.3); color: #f09595; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="back-btn" onclick="window.location.href='dashboard.html'">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+  </div>
+  <h2>New Transaction</h2>
+</div>
+
+<div class="type-toggle">
+  <div class="type-pill credit" id="typePill"></div>
+  <button class="type-btn active credit" id="creditBtn" onclick="setType('credit')">Credit +</button>
+  <button class="type-btn debit" id="debitBtn" onclick="setType('debit')">Debit −</button>
+</div>
+
+<div class="field">
+  <label>Item / Person</label>
+  <div class="select-wrap">
+    <select id="itemSelect"><option value="" disabled selected>Select item</option></select>
+  </div>
+  <div class="add-item-row">
+    <input type="text" id="newItemInput" placeholder="Add new item..." />
+    <button class="add-item-btn" onclick="addNewItem()">+ Add</button>
+  </div>
+</div>
+
+<div class="field">
+  <label>Amount (₹)</label>
+  <input type="number" id="amountInput" placeholder="0.00" min="0" />
+</div>
+
+<div class="field">
+  <label>Date</label>
+  <div class="date-display">
+    <span id="autoDate"></span>
+    <span class="date-badge">Auto</span>
+  </div>
+</div>
+
+<div class="field">
+  <label>Payment Method</label>
+  <div class="pay-opts">
+    <div class="pay-opt selected" id="cashOpt" onclick="selectPay('cash')">
+      <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+      <p>Cash</p>
+    </div>
+    <div class="pay-opt" id="bankOpt" onclick="selectPay('bank')">
+      <svg viewBox="0 0 24 24"><path d="M4 10v7h3v-7H4zm6 0v7h3v-7h-3zM2 22h19v-3H2v3zm14-12v7h3v-7h-3zM11.5 1L2 6v2h19V6l-9.5-5z"/></svg>
+      <p>Bank Transfer</p>
+    </div>
+  </div>
+</div>
+
+<div class="field">
+  <label>Description <span style="color:rgba(255,255,255,0.2);font-size:10px;">optional</span></label>
+  <textarea id="descInput" placeholder="Add a note..."></textarea>
+</div>
+
+<button class="submit-btn credit-mode" id="submitBtn" onclick="handleSubmit()">Save Transaction</button>
+<div class="msg" id="msgBox"></div>
+
+<script>
+const username = localStorage.getItem('username') || 'User';
+let currentType = 'credit';
+let currentPay = 'cash';
+
+const now = new Date();
+document.getElementById('autoDate').textContent =
+  String(now.getDate()).padStart(2,'0') + ' / ' +
+  String(now.getMonth()+1).padStart(2,'0') + ' / ' +
+  now.getFullYear();
+
+async function loadItems() {
+  try {
+    const res = await fetch('http://localhost:3000/items?username=' + username);
+    const data = await res.json();
+    const sel = document.getElementById('itemSelect');
+    sel.innerHTML = '<option value="" disabled selected>Select item</option>';
+    (data.items || []).forEach(item => {
+      const opt = document.createElement('option');
+      opt.value = item; opt.textContent = item;
+      sel.appendChild(opt);
+    });
+  } catch {}
+}
+loadItems();
+
+async function addNewItem() {
+  const val = document.getElementById('newItemInput').value.trim();
+  if (!val) return;
+  try {
+    const res = await fetch('http://localhost:3000/items', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({username, item: val}) });
+    const data = await res.json();
+    if (data.success) { document.getElementById('newItemInput').value = ''; loadItems(); }
+    else showMsg(data.message || 'Item already exists.', 'error');
+  } catch { showMsg('Cannot connect to server.', 'error'); }
+}
+
+function setType(type) {
+  currentType = type;
+  const pill = document.getElementById('typePill');
+  if (type === 'credit') {
+    pill.style.left = '4px'; pill.className = 'type-pill credit';
+    document.getElementById('creditBtn').className = 'type-btn active credit';
+    document.getElementById('debitBtn').className = 'type-btn debit';
+    document.getElementById('submitBtn').className = 'submit-btn credit-mode';
+  } else {
+    pill.style.left = 'calc(50%)'; pill.className = 'type-pill debit';
+    document.getElementById('debitBtn').className = 'type-btn active debit';
+    document.getElementById('creditBtn').className = 'type-btn credit';
+    document.getElementById('submitBtn').className = 'submit-btn debit-mode';
+  }
+}
+
+function selectPay(method) {
+  currentPay = method;
+  document.getElementById('cashOpt').className = method === 'cash' ? 'pay-opt selected' : 'pay-opt';
+  document.getElementById('bankOpt').className = method === 'bank' ? 'pay-opt selected' : 'pay-opt';
+}
+
+function showMsg(text, type) {
+  const box = document.getElementById('msgBox');
+  box.textContent = text; box.className = 'msg ' + type; box.style.display = 'block';
+}
+
+async function handleSubmit() {
+  const item = document.getElementById('itemSelect').value;
+  const amount = document.getElementById('amountInput').value;
+  const desc = document.getElementById('descInput').value;
+  if (!item) { showMsg('Please select an item.', 'error'); return; }
+  if (!amount || parseFloat(amount) <= 0) { showMsg('Please enter a valid amount.', 'error'); return; }
+  try {
+    const res = await fetch('http://localhost:3000/transaction', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ username, item, amount: parseFloat(amount), type: currentType, method: currentPay === 'cash' ? 'Cash' : 'Bank Transfer', description: desc })
+    });
+    const data = await res.json();
+    if (data.success) { showMsg('Transaction saved successfully!', 'success'); setTimeout(() => window.location.href = 'dashboard.html', 1200); }
+    else showMsg(data.message || 'Failed to save.', 'error');
+  } catch { showMsg('Cannot connect to server.', 'error'); }
+}
+</script>
+</body>
+</html>
